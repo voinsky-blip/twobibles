@@ -3,13 +3,16 @@
  *  ===================================================================== */
 
 // ---------- Константы ----------
+// Версия данных. МЕНЯЙТЕ при каждом обновлении JSON —
+// это гарантированно обходит и HTTP-кэш, и CDN GitHub Pages.
+const DATA_VERSION = '2026-09-29';
 const DATA_ROOT = 'data';
 const FONT_SIZES = ['font-small', 'font-medium', 'font-large', 'font-xlarge'];
 const DEFAULT_FONT_INDEX = 1;
 const STORAGE_KEYS = {
     theme: 'bible.theme',
-    font:  'bible.fontIndex',
-    pos:   'bible.lastPosition',
+    font: 'bible.fontIndex',
+    pos: 'bible.lastPosition',
 };
 const SEARCH_DEBOUNCE_MS = 220;
 const SEARCH_MIN_LEN = 3;
@@ -20,12 +23,12 @@ const SHOW_COMMENTARY_PLACEHOLDER = true;
 // ---------- Настройки свайпа ----------
 const SWIPE = {
     MOBILE_MAX_WIDTH: 768,
-    MIN_DISTANCE:     60,
-    MAX_DURATION:     700,
-    MAX_VERTICAL:     70,
-    RATIO:            1.4,
-    COOLDOWN:         280,
-    CLICK_BLOCK_MS:   400,
+    MIN_DISTANCE: 60,
+    MAX_DURATION: 700,
+    MAX_VERTICAL: 70,
+    RATIO: 1.4,
+    COOLDOWN: 280,
+    CLICK_BLOCK_MS: 400,
 };
 
 // ---------- Состояние ----------
@@ -44,23 +47,23 @@ const state = {
 
 // ---------- Кэш DOM-узлов ----------
 const DOM = {
-    content:         document.getElementById('content'),
-    otBooks:         document.getElementById('otBooks'),
-    ntBooks:         document.getElementById('ntBooks'),
-    bookTitle:       document.getElementById('bookTitle'),
-    chapterTitle:    document.getElementById('chapterTitle'),
+    content: document.getElementById('content'),
+    otBooks: document.getElementById('otBooks'),
+    ntBooks: document.getElementById('ntBooks'),
+    bookTitle: document.getElementById('bookTitle'),
+    chapterTitle: document.getElementById('chapterTitle'),
     chapterSelector: document.getElementById('chapterSelector'),
     versesContainer: document.getElementById('versesContainer'),
-    commentaryBox:   document.getElementById('commentaryBox'),
-    loading:         document.getElementById('loading'),
-    prevBtn:         document.getElementById('prevChapter'),
-    nextBtn:         document.getElementById('nextChapter'),
-    searchInput:     document.getElementById('searchInput'),
-    searchResults:   document.getElementById('searchResults'),
-    themeToggle:     document.getElementById('themeToggle'),
-    copyBtn:         document.getElementById('copySelectedBtn'),
-    popup:           document.getElementById('versePopup'),
-    header:          document.querySelector('.header'),
+    commentaryBox: document.getElementById('commentaryBox'),
+    loading: document.getElementById('loading'),
+    prevBtn: document.getElementById('prevChapter'),
+    nextBtn: document.getElementById('nextChapter'),
+    searchInput: document.getElementById('searchInput'),
+    searchResults: document.getElementById('searchResults'),
+    themeToggle: document.getElementById('themeToggle'),
+    copyBtn: document.getElementById('copySelectedBtn'),
+    popup: document.getElementById('versePopup'),
+    header: document.querySelector('.header'),
 };
 
 // ---------- Состояние свайпа ----------
@@ -135,10 +138,10 @@ function preloadAdjacent(bookId, chapter) {
     const idle = window.requestIdleCallback || ((f) => setTimeout(f, 300));
     const next = chapter + 1;
     if (next <= book.chapters) {
-        idle(() => fetch(`${DATA_ROOT}/${bookId}/${next}.json`).catch(() => {}));
+        idle(() => fetch(`${DATA_ROOT}/${bookId}/${next}.json`).catch(() => { }));
     }
     if (chapter > 1) {
-        idle(() => fetch(`${DATA_ROOT}/${bookId}/${chapter - 1}.json`).catch(() => {}));
+        idle(() => fetch(`${DATA_ROOT}/${bookId}/${chapter - 1}.json`).catch(() => { }));
     }
 }
 
@@ -346,11 +349,11 @@ function renderCommentary(commentary, bookMeta, chapter) {
     }
     else if (Array.isArray(commentary) && commentary.length) {
         html = `<h2>Толкование</h2>` +
-               commentary.map(p => `<p>${p}</p>`).join('');
+            commentary.map(p => `<p>${p}</p>`).join('');
     }
 
     if (!html && SHOW_COMMENTARY_PLACEHOLDER && bookMeta && chapter) {
-        html  = `<h2>Толкование на ${bookMeta.name}, глава ${chapter}</h2>`;
+        html = `<h2>Толкование на ${bookMeta.name}, глава ${chapter}</h2>`;
         html += `<p class="commentary-empty">Толкование на эту главу пока не добавлено.</p>`;
     }
 
@@ -743,7 +746,7 @@ function applyTheme(theme) {
 
 DOM.themeToggle.addEventListener('click', () => {
     const next = document.body.classList.contains('dark') ? 'light' : 'dark';
-    try { localStorage.setItem(STORAGE_KEYS.theme, next); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.theme, next); } catch { }
     applyTheme(next);
 });
 
@@ -751,7 +754,7 @@ function applyFont(index) {
     index = Math.max(0, Math.min(FONT_SIZES.length - 1, index));
     document.body.classList.remove(...FONT_SIZES);
     document.body.classList.add(FONT_SIZES[index]);
-    try { localStorage.setItem(STORAGE_KEYS.font, index); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.font, index); } catch { }
 }
 
 document.querySelectorAll('[data-font-delta]').forEach(btn => {
@@ -767,7 +770,7 @@ document.querySelectorAll('[data-font-delta]').forEach(btn => {
 function savePosition(bookId, chapter) {
     try {
         localStorage.setItem(STORAGE_KEYS.pos, JSON.stringify({ bookId, chapter, ts: Date.now() }));
-    } catch {}
+    } catch { }
 }
 function loadPosition() {
     try {
@@ -803,11 +806,18 @@ async function init() {
     }
     await openChapter(pos?.bookId || first.id, pos?.chapter || 1);
 
+
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch((e) => {
-            console.warn('SW не зарегистрирован:', e);
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                // Проверяем обновления SW при каждой загрузке страницы
+                reg.update();
+            }).catch(err => {
+                console.warn('SW registration failed:', err);
+            });
         });
     }
+
 }
 
 init();

@@ -1,52 +1,89 @@
-// Поднимаем версию, чтобы браузер выкинул старый кэш
-const CACHE_VERSION = 'bible-v4';
-const STATIC = [
+// sw.js
+// Версия кэша. МЕНЯЙТЕ при каждом обновлении данных, чтобы старый кэш удалился.
+const CACHE_VERSION = 'v2';
+const STATIC_CACHE = `twobibles-static-${CACHE_VERSION}`;
+const DATA_CACHE = `twobibles-data-${CACHE_VERSION}`;
+
+// Ресурсы, которые нужны для офлайна
+const STATIC_ASSETS = [
     './',
     './index.html',
     './styles.css',
-    './app.js',
-    './data/books.json',
+    './app.js'
 ];
 
-self.addEventListener('install', (e) => {
-    e.waitUntil(
-        caches.open(CACHE_VERSION).then(c =>
-            Promise.all(STATIC.map(url => c.add(url).catch(() => null)))
-        )
+// ---------- INSTALL ----------
+self.addEventListener('install', event => {
+    self.skipWaiting(); // активировать новый SW сразу
+    event.waitUntil(
+        caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
     );
-    self.skipWaiting();
 });
 
-self.addEventListener('activate', (e) => {
-    e.waitUntil(
-        caches.keys().then(keys =>
-            Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)))
-        )
+// ---------- ACTIVATE ----------
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys()
+            .then(keys => Promise.all(
+                keys
+                    .filter(key => key !== STATIC_CACHE && key !== DATA_CACHE)
+                    .map(key => caches.delete(key))
+            ))
+            .then(() => self.clients.claim()) // взять контроль над открытыми страницами
     );
-    self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
-    const url = new URL(e.request.url);
-    if (e.request.method !== 'GET') return;
-    if (url.origin !== location.origin) return;
+// ---------- FETCH ----------
+self.addEventListener('fetch', event => {
+    const req = event.request;
+    if (req.method !== 'GET') return;
 
-    // Данные Библии — сначала кэш, потом сеть
-    if (url.pathname.includes('/data/') || url.pathname.endsWith('.json')) {
-        e.respondWith(
-            caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
-                if (res.ok) {
-                    const clone = res.clone();
-                    caches.open(CACHE_VERSION).then(c => c.put(e.request, clone));
-                }
-                return res;
-            }))
-        );
+    const url = new URL(req.url);
+    if (url.origin !== self.location.origin) return; // не трогаем сторонние запросы
+
+    // ---- JSON-данные: network-first с обходом HTTP-кэша ----
+    if (url.pathname.includes('/data/') && url.pathname.endsWith('.json')) {
+        event.respondWith(networkFirstJSON(req));
         return;
     }
 
-    // Всё остальное — сеть, при неудаче кэш
-    e.respondWith(
-        fetch(e.request).catch(() => caches.match(e.request))
-    );
+    // ---- Остальное: stale-while-revalidate ----
+    event.respondWith(staleWhileRevalidate(req));
 });
+
+// ---------- Стратегии ----------
+
+async function networkFirstJSON(request) {
+    // Ключ кэша — без query-параметра ?v=... чтобы офлайн-фолбэк работал
+    const cacheKey = new Request(request.url.split('?')[0], { method: 'GET' });
+    try {
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response && response.ok) {
+            const cache = await caches.open(DATA_CACHE);
+            cache.put(cacheKey, response.clone());
+        }
+        return response;
+    } catch (err) {
+        const cached = await caches.match(cacheKey);
+        if (cached) return cached;
+        return new Response(
+            JSON.stringify({ error: 'offline', message: 'Нет сети и нет кэша' }),
+            { status: 503, headers: { 'Content-Type': 'application/json' } }
+        );
+    }
+}
+
+async function staleWhileRevalidate(request) {
+    const cached = await caches.match(request);
+    const networkPromise = fetch(request)
+        .then(response => {
+            if (response && response.ok) {
+                const copy = response.clone();
+                caches.open(STATIC_CACHE).then(cache => cache.put(request, copy));
+            }
+            return response;
+        })
+        .catch(() => null);
+
+    return cached || networkPromise || fetch(request);
+}
