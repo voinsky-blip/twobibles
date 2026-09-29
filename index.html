@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Библия с толкованиями — Синодальный перевод</title>
+    <meta name="description" content="Библия Синодального перевода с толкованиями на каждую главу. Быстрый поиск по всей Библии.">
+    <meta name="theme-color" content="#4a3728">
+
+    <link rel="preconnect" href="https://mc.yandex.ru" crossorigin>
+
+    <!-- Критичные стили (первая отрисовка) -->
+    <style>
+        [hidden] { display: none !important; }
+        :root {
+            --bg: #faf6ef;
+            --text: #2c2416;
+            --accent: #8b5e34;
+            --gold: #b8860b;
+            --card-bg: #fffdf8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: linear-gradient(135deg, #4a3728, #2c1f14);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 { font-size: 1.5rem; font-weight: normal; font-style: italic; }
+        #loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            font-style: italic;
+            color: #888;
+        }
+    </style>
+
+    <!-- ОТНОСИТЕЛЬНЫЙ путь! -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Yandex.Metrika (отложенно) -->
+    <script>
+        window.addEventListener('load', function () {
+            if (navigator.connection && navigator.connection.saveData) return;
+            setTimeout(function () {
+                (function (m, e, t, r, i, k, a) {
+                    m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+                    m[i].l = 1 * new Date();
+                    for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return } }
+                    k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+                })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=112719621', 'ym');
+                ym(112719621, 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce: true, trackLinks: true });
+            }, 2000);
+        });
+    </script>
+    <noscript>
+        <div><img src="https://mc.yandex.ru/watch/112719621" style="position:absolute;left:-9999px" alt=""></div>
+    </noscript>
+</head>
+
+<body>
+
+    <header class="header">
+        <h1>📖 Библия <span>с толкованиями</span></h1>
+        <div class="header-controls">
+            <div class="search-container" id="searchContainer">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Поиск по всей Библии..." autocomplete="off"
+                    autocapitalize="off" spellcheck="false" aria-label="Поиск">
+                <div class="search-results" id="searchResults" role="listbox"></div>
+            </div>
+            <div class="nav-arrows">
+                <button class="nav-arrow" id="prevChapter" title="Предыдущая глава" aria-label="Предыдущая глава">◀</button>
+                <button class="nav-arrow" id="nextChapter" title="Следующая глава" aria-label="Следующая глава">▶</button>
+            </div>
+            <span class="font-size-group">
+                <button class="font-size-btn" data-font-delta="-1" title="Уменьшить шрифт" aria-label="Уменьшить шрифт">A−</button>
+                <button class="font-size-btn" data-font-delta="1" title="Увеличить шрифт" aria-label="Увеличить шрифт">A+</button>
+            </span>
+            <button class="theme-toggle" id="themeToggle" title="Переключить тему" aria-label="Переключить тему">🌓</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar" id="sidebar">
+            <h3>📜 Ветхий Завет</h3>
+            <div id="otBooks"></div>
+            <h3>✝️ Новый Завет</h3>
+            <div id="ntBooks"></div>
+        </aside>
+
+        <main class="content" id="content">
+            <div id="loading">Загрузка…</div>
+            <div class="book-title" id="bookTitle" hidden></div>
+            <div class="chapter-title" id="chapterTitle" hidden></div>
+            <div id="selectionTools">
+                <button id="copySelectedBtn" hidden>📋 Копировать выделенные</button>
+            </div>
+            <div id="chapterSelector" class="chapter-selector"></div>
+            <hr class="divider">
+            <div id="versesContainer"></div>
+            <div class="commentary" id="commentaryBox" hidden></div>
+        </main>
+    </div>
+
+    <div class="verse-popup" id="versePopup" role="status" aria-live="polite"></div>
+
+    <!-- ОТНОСИТЕЛЬНЫЙ путь! -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>

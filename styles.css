@@ -1,0 +1,879 @@
+/* =====================================================================
+ *  Библия с толкованиями — стили (v2)
+ *  ===================================================================== */
+
+:root {
+    --bg: #faf6ef;
+    --bg-dark: #1e1b16;
+    --text: #2c2416;
+    --text-dark: #e8dfd0;
+    --accent: #8b5e34;
+    --accent-light: #c4a47c;
+    --gold: #b8860b;
+    --card-bg: #fffdf8;
+    --card-bg-dark: #2a2620;
+    --border: #e0d5c5;
+    --border-dark: #3d372e;
+    --commentary-bg: #f5efe5;
+    --commentary-bg-dark: #333029;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --radius: 12px;
+    --transition: 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background var(--transition), color var(--transition);
+}
+
+body.dark {
+    background: var(--bg-dark);
+    color: var(--text-dark);
+}
+
+/* ---- Размер шрифта ---- */
+body.font-small .verse {
+    font-size: 0.9rem;
+}
+body.font-small .commentary p,
+body.font-small .commentary li {
+    font-size: 0.9rem;
+}
+
+body.font-medium .verse {
+    font-size: 1.1rem;
+}
+body.font-medium .commentary p,
+body.font-medium .commentary li {
+    font-size: 1.0rem;
+}
+
+body.font-large .verse {
+    font-size: 1.4rem;
+}
+body.font-large .commentary p,
+body.font-large .commentary li {
+    font-size: 1.3rem;
+}
+
+body.font-xlarge .verse {
+    font-size: 1.6rem;
+}
+body.font-xlarge .commentary p,
+body.font-xlarge .commentary li {
+    font-size: 1.5rem;
+}
+
+/* =====================================================================
+ *  Header
+ * ===================================================================== */
+.header {
+    background: linear-gradient(135deg, #4a3728, #2c1f14);
+    color: #fff;
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header h1 {
+    font-size: 1.7rem;
+    letter-spacing: 1px;
+    font-weight: normal;
+    font-style: italic;
+}
+
+.header h1 span {
+    color: var(--gold);
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.font-size-group {
+    display: inline-flex;
+    white-space: nowrap;
+    gap: 4px;
+}
+
+/* ---- Кнопки в шапке ---- */
+.btn {
+    padding: 8px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all var(--transition);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.btn.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1e1b16;
+    font-weight: bold;
+}
+
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.font-size-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.2s;
+    font-family: inherit;
+    line-height: 1;
+    min-width: 40px;
+}
+
+.font-size-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.nav-arrows {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.nav-arrow {
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.nav-arrow:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.nav-arrow:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* =====================================================================
+ *  Поиск
+ * ===================================================================== */
+.search-container {
+    position: relative;
+    z-index: 200;
+}
+
+.search-container input {
+    padding: 8px 15px 8px 35px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    width: 200px;
+    transition: width var(--transition);
+    outline: none;
+}
+
+.search-container input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.search-container input:focus {
+    width: 260px;
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.search-container .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.search-results {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 380px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    z-index: 300;
+    display: none;
+    padding: 8px;
+}
+
+body.dark .search-results {
+    background: var(--card-bg-dark);
+    border-color: var(--border-dark);
+}
+
+.search-results.show {
+    display: block;
+}
+
+.search-result-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-size: 0.9rem;
+    color: var(--text);
+    -webkit-tap-highlight-color: rgba(139, 94, 52, 0.2);
+}
+
+body.dark .search-result-item {
+    color: var(--text-dark);
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.search-result-item:hover,
+.search-result-item.active {
+    background: rgba(139, 94, 52, 0.15);
+}
+
+.search-result-item .result-ref {
+    font-weight: bold;
+    color: var(--accent);
+    margin-bottom: 3px;
+}
+
+.search-result-item .result-text {
+    font-style: italic;
+    color: #666;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.dark .search-result-item .result-text {
+    color: #aaa;
+}
+
+.search-no-results {
+    padding: 15px;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+}
+
+/* =====================================================================
+ *  Layout
+ * ===================================================================== */
+.main-container {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.sidebar {
+    width: 260px;
+    background: var(--card-bg);
+    border-right: 1px solid var(--border);
+    padding: 15px;
+    overflow-y: auto;
+    flex-shrink: 0;
+    transition: background var(--transition), border-color var(--transition);
+    max-height: calc(100vh - 80px);
+    position: sticky;
+    top: 80px;
+}
+
+body.dark .sidebar {
+    background: var(--card-bg-dark);
+    border-color: var(--border-dark);
+}
+
+.sidebar h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin: 15px 0 8px;
+    font-weight: bold;
+}
+
+.sidebar h3:first-child {
+    margin-top: 5px;
+}
+
+.book-link {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    border-left: 3px solid transparent;
+    font-family: inherit;
+}
+
+body.dark .book-link {
+    color: var(--text-dark);
+}
+
+.book-link:hover {
+    background: rgba(139, 94, 52, 0.1);
+    border-left-color: var(--accent);
+}
+
+.book-link.active {
+    background: rgba(139, 94, 52, 0.2);
+    border-left-color: var(--gold);
+    font-weight: bold;
+}
+
+/* =====================================================================
+ *  Селектор глав
+ * ===================================================================== */
+.chapter-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 10px 0;
+    align-items: center;
+}
+
+.chapter-btn {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    color: var(--text);
+    transition: all 0.2s;
+    min-width: 32px;
+    min-height: 32px;
+    text-align: center;
+}
+
+body.dark .chapter-btn {
+    border-color: var(--border-dark);
+    color: var(--text-dark);
+}
+
+.chapter-btn:hover {
+    background: rgba(139, 94, 52, 0.15);
+    border-color: var(--accent);
+}
+
+.chapter-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    font-weight: bold;
+}
+
+.chapter-selector select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text);
+    cursor: pointer;
+    appearance: auto;
+    transition: background var(--transition), border-color var(--transition), color var(--transition);
+    min-height: 44px;
+}
+
+body.dark .chapter-selector select {
+    background: var(--card-bg-dark);
+    border-color: var(--border-dark);
+    color: var(--text-dark);
+}
+
+.chapter-selector select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(139, 94, 52, 0.3);
+}
+
+/* =====================================================================
+ *  Контент
+ * ===================================================================== */
+.content {
+    flex: 1;
+    padding: 25px 35px;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+    touch-action: pan-y;
+}
+
+.book-title {
+    font-size: 1.8rem;
+    color: var(--accent);
+    margin-bottom: 5px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.chapter-title {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    color: var(--gold);
+    font-style: italic;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 15px 0;
+}
+
+body.dark .divider {
+    border-color: var(--border-dark);
+}
+
+/* =====================================================================
+ *  Стихи
+ * ===================================================================== */
+.verse {
+    margin-bottom: 6px;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    padding: 2px 0;
+}
+
+.verse-number {
+    color: var(--gold);
+    font-weight: bold;
+    font-size: 0.8rem;
+    vertical-align: super;
+    margin-right: 4px;
+    cursor: pointer;
+}
+
+.verse-text {
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
+/* Курсив и другие разрешённые форматирования в тексте стихов */
+.verse-text i,
+.verse-text em {
+    font-style: italic;
+}
+
+.verse-text b,
+.verse-text strong {
+    font-weight: bold;
+}
+
+.verse-text u {
+    text-decoration: underline;
+}
+
+.verse-text:hover {
+    background: rgba(184, 134, 11, 0.15);
+}
+
+.verse-text.selected {
+    background: rgba(184, 134, 11, 0.4);
+    box-shadow: 0 0 10px rgba(184, 134, 11, 0.3);
+    border-radius: 3px;
+}
+
+body.dark .verse-text.selected {
+    background: rgba(184, 134, 11, 0.3);
+}
+
+/* Пульсирующая подсветка найденных слов после перехода из поиска */
+@keyframes searchBlink {
+    0%, 100% {
+        background-color: #ffdc32;
+        box-shadow: 0 0 10px 2px rgba(255, 200, 0, 0.85);
+    }
+    50% {
+        background-color: #fff4b8;
+        box-shadow: 0 0 2px 0 rgba(255, 200, 0, 0.2);
+    }
+}
+
+.search-highlight {
+    color: #1e1b16 !important;
+    border-radius: 3px;
+    padding: 0 2px;
+    animation: searchBlink 1s ease-in-out infinite;
+    -webkit-animation: searchBlink 1s ease-in-out infinite;
+    display: inline;
+}
+
+/* =====================================================================
+ *  Толкования
+ * ===================================================================== */
+.commentary {
+    background: var(--commentary-bg);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 20px 25px;
+    margin-top: 25px;
+    transition: background var(--transition);
+}
+
+body.dark .commentary {
+    background: var(--commentary-bg-dark);
+}
+
+.commentary h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.commentary h3,
+.commentary h4 {
+    font-size: 1.05rem;
+    color: var(--accent);
+    margin: 14px 0 8px;
+    font-weight: bold;
+}
+
+.commentary p {
+    line-height: 1.8;
+    margin-bottom: 12px;
+    font-size: 0.98rem;
+}
+
+.commentary p:last-child {
+    margin-bottom: 0;
+}
+
+/* Списки внутри толкований */
+.commentary ul,
+.commentary ol {
+    margin-left: 1.5em;
+    margin-bottom: 12px;
+    line-height: 1.8;
+}
+
+.commentary li {
+    margin-bottom: 6px;
+    font-size: 0.98rem;
+}
+
+.commentary ul.custom-list {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.commentary ul.custom-list li {
+    position: relative;
+    padding-left: 1.4em;
+}
+
+.commentary ul.custom-list li::before {
+    content: "•";
+    color: var(--accent);
+    font-weight: bold;
+    position: absolute;
+    left: 0.3em;
+    top: 0;
+}
+
+/* Защита от inline-стилей из старых толкований */
+.commentary ol[style] {
+    margin-left: 30px !important;
+}
+
+.commentary .key-point {
+    background: rgba(184, 134, 11, 0.1);
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+.commentary .commentary-empty {
+    font-style: italic;
+    color: #888;
+}
+
+body.dark .commentary .commentary-empty {
+    color: #aaa;
+}
+
+/* =====================================================================
+ *  Панель выделения / кнопка копирования
+ * ===================================================================== */
+#selectionTools {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 10px 0;
+}
+
+#copySelectedBtn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+#copySelectedBtn:hover {
+    background: var(--gold);
+}
+
+#copySelectedBtn[hidden] {
+    display: none;
+}
+
+/* =====================================================================
+ *  Popup
+ * ===================================================================== */
+.verse-popup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 400;
+    font-size: 0.9rem;
+}
+
+.verse-popup.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* =====================================================================
+ *  Скроллбар
+ * ===================================================================== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+/* =====================================================================
+ *  Мобильные
+ * ===================================================================== */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        max-height: 200px;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    body.dark .sidebar {
+        border-bottom-color: var(--border-dark);
+    }
+
+    .content {
+        max-height: none;
+        padding: 15px 20px;
+    }
+
+    .header {
+        padding: 12px 16px;
+    }
+
+    .header h1 {
+        font-size: 1.2rem;
+    }
+
+    .header-controls {
+        gap: 6px;
+    }
+
+    .search-container input {
+        width: 130px;
+    }
+
+    .search-container input:focus {
+        width: 160px;
+    }
+
+    .search-results {
+        left: 10px;
+        right: 10px;
+        width: auto;
+        max-width: 380px;
+        max-height: 60vh;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .font-size-group {
+        display: inline-flex !important;
+        white-space: nowrap !important;
+        flex-shrink: 0;
+    }
+
+    /* Скрываем кнопки глав, показываем select */
+    .chapter-selector .chapter-btn {
+        display: none;
+    }
+
+    .chapter-selector select {
+        display: block !important;
+    }
+
+    /* Мерцание чуть медленнее для читаемости */
+    .search-highlight {
+        animation: searchBlink 1.2s ease-in-out infinite;
+        -webkit-animation: searchBlink 1.2s ease-in-out infinite;
+    }
+
+    .book-title {
+        font-size: 1.5rem;
+    }
+
+    .chapter-title {
+        font-size: 1.1rem;
+    }
+
+    /* Кнопки хедера — тач-френдли (минимум 44×44) */
+    .nav-arrow,
+    .font-size-btn,
+    .theme-toggle {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Толкования — компактнее */
+    .commentary {
+        padding: 15px 18px;
+        margin-top: 20px;
+    }
+
+    .commentary h2 {
+        font-size: 1.1rem;
+    }
+
+    .commentary ul,
+    .commentary ol {
+        margin-left: 1.2em;
+    }
+}
+
+/* На десктопе select скрыт, кнопки видны */
+@media (min-width: 769px) {
+    .chapter-selector select {
+        display: none !important;
+    }
+}
+
+/* =====================================================================
+ *  Уважаем reduced motion
+ * ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
