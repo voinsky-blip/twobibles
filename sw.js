@@ -1,6 +1,6 @@
 // sw.js
 // Версия кэша. МЕНЯЙТЕ при каждом обновлении данных, чтобы старый кэш удалился.
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const STATIC_CACHE = `twobibles-static-${CACHE_VERSION}`;
 const DATA_CACHE = `twobibles-data-${CACHE_VERSION}`;
 

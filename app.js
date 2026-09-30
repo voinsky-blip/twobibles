@@ -1,5 +1,5 @@
 /* =====================================================================
- *  Библия с толкованиями — оптимизированное приложение (v3.2)
+ *  Библия с толкованиями — оптимизированное приложение (v3.3)
  *  ===================================================================== */
 
 // ---------- Константы ----------
@@ -766,17 +766,89 @@ document.querySelectorAll('[data-font-delta]').forEach(btn => {
 });
 
 // =====================================================================
-//  СОХРАНЕНИЕ ПОЗИЦИИ
+//  СОХРАНЕНИЕ ПОЗИЦИИ (книга + глава + якорь чтения)
 // =====================================================================
-function savePosition(bookId, chapter) {
+function savePosition(bookId, chapter, anchor = null) {
     try {
-        localStorage.setItem(STORAGE_KEYS.pos, JSON.stringify({ bookId, chapter, ts: Date.now() }));
+        localStorage.setItem(
+            STORAGE_KEYS.pos,
+            JSON.stringify({ bookId, chapter, anchor, ts: Date.now() })
+        );
     } catch { }
 }
 function loadPosition() {
     try {
         return JSON.parse(localStorage.getItem(STORAGE_KEYS.pos) || 'null');
     } catch { return null; }
+}
+
+// =====================================================================
+//  ЯКОРЬ ЧТЕНИЯ: какой стих/блок сейчас наверху экрана
+// =====================================================================
+
+/**
+ * Возвращает {type:'verse', verse} первого видимого стиха,
+ * либо {type:'commentary'}, если все стихи уже выше экрана,
+ * либо null, если и комментарий не виден.
+ */
+function getReadingAnchor() {
+    if (!state.currentBookId || !state.currentChapter) return null;
+
+    // Верхняя граница «зоны чтения» в координатах вьюпорта:
+    // на мобильных это низ липкой шапки, на десктопе — верх .content.
+    const refTop = isMobileViewport()
+        ? ((DOM.header?.offsetHeight || 0) + 4)
+        : (DOM.content.getBoundingClientRect().top + 4);
+
+    const verses = DOM.versesContainer.children; // .verse
+    for (const v of verses) {
+        if (v.getBoundingClientRect().bottom > refTop) {
+            return { type: 'verse', verse: v.dataset.verse };
+        }
+    }
+
+    if (!DOM.commentaryBox.hidden) {
+        if (DOM.commentaryBox.getBoundingClientRect().bottom > refTop) {
+            return { type: 'commentary' };
+        }
+    }
+    return null;
+}
+
+/** Прокручивает так, чтобы якорь оказался сверху зоны чтения. */
+function scrollToAnchor(anchor) {
+    if (!anchor) return false;
+
+    let el = null;
+    if (anchor.type === 'verse') {
+        el = DOM.versesContainer.querySelector(`.verse[data-verse="${anchor.verse}"]`);
+    } else if (anchor.type === 'commentary') {
+        el = DOM.commentaryBox.hidden ? null : DOM.commentaryBox;
+    }
+    if (!el) return false;
+
+    if (isMobileViewport()) {
+        const headerH = DOM.header?.offsetHeight || 0;
+        const top = el.getBoundingClientRect().top + window.scrollY - headerH - 8;
+        window.scrollTo(0, Math.max(0, top));
+    } else {
+        const contentTop = DOM.content.getBoundingClientRect().top;
+        const offset = el.getBoundingClientRect().top - contentTop + DOM.content.scrollTop;
+        DOM.content.scrollTop = Math.max(0, offset - 8);
+    }
+    return true;
+}
+
+// Дебаунс-сохранение при скролле
+const saveAnchorDebounced = debounce(() => {
+    if (!state.currentBookId || !state.currentChapter) return;
+    savePosition(state.currentBookId, state.currentChapter, getReadingAnchor());
+}, 400);
+
+// Немедленное сохранение (при уходе со страницы)
+function saveAnchorNow() {
+    if (!state.currentBookId || !state.currentChapter) return;
+    savePosition(state.currentBookId, state.currentChapter, getReadingAnchor());
 }
 
 // =====================================================================
@@ -812,6 +884,15 @@ window.addEventListener('scroll', onAnyScroll, { passive: true });
 DOM.content.addEventListener('scroll', onAnyScroll, { passive: true });
 window.addEventListener('resize', updateBackToTop);
 
+// Сохранение позиции чтения при скролле и при уходе со страницы
+window.addEventListener('scroll', saveAnchorDebounced, { passive: true });
+DOM.content.addEventListener('scroll', saveAnchorDebounced, { passive: true });
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveAnchorNow();
+});
+window.addEventListener('pagehide', saveAnchorNow);
+
 if (DOM.backToTop) {
     DOM.backToTop.addEventListener('click', () => {
         const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
@@ -832,6 +913,12 @@ if (DOM.backToTop) {
 //  ИНИЦИАЛИЗАЦИЯ
 // =====================================================================
 async function init() {
+    // Отключаем встроенное восстановление скролла браузера,
+    // чтобы не конфликтовало с нашим.
+    if ('scrollRestoration' in history) {
+        try { history.scrollRestoration = 'manual'; } catch { }
+    }
+
     applyTheme(localStorage.getItem(STORAGE_KEYS.theme) || 'light');
     applyFont(+(localStorage.getItem(STORAGE_KEYS.font) ?? DEFAULT_FONT_INDEX));
 
@@ -855,7 +942,23 @@ async function init() {
         DOM.loading.textContent = 'Нет данных о книгах';
         return;
     }
-    await openChapter(pos?.bookId || first.id, pos?.chapter || 1);
+
+    const startBookId = pos?.bookId || first.id;
+    const startChapter = pos?.chapter || 1;
+    const startAnchor = pos?.anchor || null;
+
+    // Если есть якорь — не прыгаем наверх, восстановим сами.
+    await openChapter(startBookId, startChapter, { scrollTop: !startAnchor });
+
+    if (startAnchor) {
+        // Двойной rAF: даём браузеру разложить контент после рендера.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (scrollToAnchor(startAnchor)) {
+                // openChapter() перезаписал anchor=null — вернём значение.
+                savePosition(state.currentBookId, state.currentChapter, startAnchor);
+            }
+        }));
+    }
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
