@@ -64,6 +64,7 @@ const DOM = {
     copyBtn: document.getElementById('copySelectedBtn'),
     popup: document.getElementById('versePopup'),
     header: document.querySelector('.header'),
+    backToTop: document.getElementById('backToTop'),
 };
 
 // ---------- Состояние свайпа ----------
@@ -779,6 +780,55 @@ function loadPosition() {
 }
 
 // =====================================================================
+//  КНОПКА «В НАЧАЛО»
+// =====================================================================
+const BACK_TO_TOP_THRESHOLD = 400;
+
+const prefersReducedMotion = () =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function currentScrollTop() {
+    // На десктопе скроллится .content, на мобильных — само окно.
+    // Берём максимум из двух, чтобы корректно работать в обоих режимах.
+    return Math.max(window.scrollY || 0, DOM.content.scrollTop || 0);
+}
+
+function updateBackToTop() {
+    if (!DOM.backToTop) return;
+    DOM.backToTop.classList.toggle('show', currentScrollTop() > BACK_TO_TOP_THRESHOLD);
+}
+
+// Скролл-события. Оборачиваем в rAF, чтобы не дёргать layout на каждый пиксель.
+let backToTopRaf = 0;
+function onAnyScroll() {
+    if (backToTopRaf) return;
+    backToTopRaf = requestAnimationFrame(() => {
+        backToTopRaf = 0;
+        updateBackToTop();
+    });
+}
+
+window.addEventListener('scroll', onAnyScroll, { passive: true });
+DOM.content.addEventListener('scroll', onAnyScroll, { passive: true });
+window.addEventListener('resize', updateBackToTop);
+
+if (DOM.backToTop) {
+    DOM.backToTop.addEventListener('click', () => {
+        const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+        if (isMobileViewport()) {
+            window.scrollTo({ top: 0, behavior });
+        } else {
+            DOM.content.scrollTo({ top: 0, behavior });
+        }
+        // На всякий случай синхронизируем оба «слоя»
+        if (behavior === 'auto') {
+            window.scrollTo(0, 0);
+            DOM.content.scrollTop = 0;
+        }
+    });
+}
+
+// =====================================================================
 //  ИНИЦИАЛИЗАЦИЯ
 // =====================================================================
 async function init() {
@@ -797,6 +847,7 @@ async function init() {
     }
 
     renderSidebar();
+    updateBackToTop();
 
     const pos = loadPosition();
     const first = state.books.oldTestament[0];
@@ -805,7 +856,6 @@ async function init() {
         return;
     }
     await openChapter(pos?.bookId || first.id, pos?.chapter || 1);
-
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -817,7 +867,6 @@ async function init() {
             });
         });
     }
-
 }
 
 init();

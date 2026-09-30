@@ -865,6 +865,61 @@ body.dark .commentary .commentary-empty {
 }
 
 /* =====================================================================
+ *  Кнопка «в начало»
+ * ===================================================================== */
+.back-to-top {
+    position: fixed;
+    right: 20px;
+    bottom: 80px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: var(--accent);
+    color: #fff;
+    font-size: 1.25rem;
+    font-family: inherit;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s, background 0.2s;
+    z-index: 350;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-to-top.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.back-to-top:hover {
+    background: var(--gold);
+}
+
+.back-to-top:active {
+    transform: translateY(0) scale(0.95);
+}
+
+body.dark .back-to-top {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 768px) {
+    .back-to-top {
+        right: 14px;
+        bottom: 74px;
+        width: 46px;
+        height: 46px;
+    }
+}
+
+/* =====================================================================
  *  Уважаем reduced motion
  * ===================================================================== */
 @media (prefers-reduced-motion: reduce) {
